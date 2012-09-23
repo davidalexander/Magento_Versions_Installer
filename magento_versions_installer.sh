@@ -6,6 +6,7 @@ MAGENTO_VERSIONS_ARRAY=("1.4.0.1" "1.4.1.0" "1.4.1.1" "1.4.2.0" "1.5.0.1" "1.5.1
 MAGENTO_SAFE_VERSIONS_ARRAY=( "${MAGENTO_VERSIONS_ARRAY[@]//./}" )
 PHP_PATH="/Applications/MAMP/bin/php/php5.3.6/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
+SBP_PATH="/Users/david/Sites/github/Magento-Boilerplate"
 
 function remove_all_installs {
 
@@ -29,6 +30,7 @@ function remove_all_installs {
 }
 
 function install_all_versions {
+
     echo -n "Downloading and Extracting Sample Data..."
     if [ -f $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2" ]
         then
@@ -37,7 +39,7 @@ function install_all_versions {
             curl www.magentocommerce.com/downloads/assets/$SAMPLE_DATA_VERSION/magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2 > $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2"
     fi
     tar xzf $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2" -C $SITES_DIR
-
+    
     echo "Downloading Magento Archives..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
     do
@@ -50,7 +52,7 @@ function install_all_versions {
             echo "done"
         fi
     done
-
+    
     echo "Extracting Magento Archives..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
     do
@@ -61,7 +63,7 @@ function install_all_versions {
         rm -fr $SITES_DIR"magento"
         echo "done"
     done
-
+    
     echo "Creating Magento Databases..."
     for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
     do
@@ -70,7 +72,7 @@ function install_all_versions {
         $SQL_PATH -uroot -proot -e "CREATE DATABASE magento_$i;"
         echo "done"
     done
-
+    
     echo "Importing Filesystem and Database Sample Data..."
     echo "    Starting Filesystem Import..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
@@ -88,11 +90,11 @@ function install_all_versions {
         echo "done"
     done
     echo "    Database Import Done"
-
+    
     echo -n "Deleting Sample Data Folder..."
     rm -fr $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION"
     echo "done"
-
+    
     echo "Correcting Folder Permissions..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
     do
@@ -101,7 +103,7 @@ function install_all_versions {
         chmod -R 777 $SITES_DIR"magento_$i/media" $SITES_DIR"magento_$i/var"
         echo "  $i Done"
     done
-
+    
     echo "Installing Magento..."
     for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
     do
@@ -127,6 +129,49 @@ function install_all_versions {
         --admin_username "example@example.com" \
         --admin_password "password123"
     done
+
+    echo "Installing Skywire Boilerplate from '$SBP_PATH'..."
+    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+    do
+        echo -n "    Copying files for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+        cp -R $SBP_PATH/* $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+        echo "done"
+    done
+    
+    for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
+    do
+        echo -n "    Updating database for $i..."
+        $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/001_config_reset.sql"
+        $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/002_optional_zip_countries.sql"
+        # $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/003_site_specific.sql" # this would need to be edited first
+        echo "done"
+    done
+
+    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+    do
+        echo "    Updating CMS pages/blocks for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+        cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skywire_defaults/php/"
+        $PHP_PATH -f "cms_blocks.php"
+        $PHP_PATH -f "cms_pages.php"
+    done
+
+    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+    do
+        echo -n "    Patching index.php for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+        patch -s $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/index.php" < $SBP_PATH"/skywire_defaults/magento_developer_subdomains.patch"
+        echo "done"
+    done
+
+    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+    do
+        echo -n "    Setting up repo for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+        cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+        git init
+        git add -A
+        git commit -m "initial commit"
+        echo "done"
+    done
+
     echo "Romeo...done."
 }
 
