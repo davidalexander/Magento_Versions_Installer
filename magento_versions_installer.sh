@@ -8,10 +8,15 @@ PHP_PATH="/Applications/MAMP/bin/php/php5.3.6/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
 
 function remove_all_installs {
+
     echo "Removing all magento installs..."
-    echo -n "  Removing files and directories..."
-    rm -frv $SITES_DIR"magento.1*"
-    echo "done"
+    echo "  Removing files and directories..."
+    for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
+    do
+        echo -n "    Removing $i..."
+        rm -fr $SITES_DIR"magento_$i"
+        echo "done"
+    done
     echo "  Removing databases..."
     for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
     do
@@ -20,6 +25,7 @@ function remove_all_installs {
         echo "done"
     done
     echo "Romeo...done."
+
 }
 
 function install_all_versions {
