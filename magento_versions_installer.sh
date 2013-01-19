@@ -100,7 +100,7 @@ function install_all_versions {
     do
         mkdir $SITES_DIR"magento_$i/var/cache/"
         chmod 777 $SITES_DIR"magento_$i"
-        chmod -R 777 $SITES_DIR"magento_$i/includes" $SITES_DIR"magento_$i/media" $SITES_DIR"magento_$i/var $SITES_DIR"magento_$i/app/etc"
+        chmod -R 777 $SITES_DIR"magento_$i/includes" $SITES_DIR"magento_$i/media" $SITES_DIR"magento_$i/var" $SITES_DIR"magento_$i/app/etc"
         echo "  $i Done"
     done
 
