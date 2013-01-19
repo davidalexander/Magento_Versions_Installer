@@ -134,7 +134,7 @@ function install_all_versions {
     for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
     do
         echo -n "    Copying files for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-        cp -R $SBP_PATH/* $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+        cp -R $SBP_PATH/ $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
         echo "done"
     done
 
