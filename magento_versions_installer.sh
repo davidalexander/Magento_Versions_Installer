@@ -39,7 +39,7 @@ function install_all_versions {
             curl www.magentocommerce.com/downloads/assets/$SAMPLE_DATA_VERSION/magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2 > $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2"
     fi
     tar xzf $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2" -C $SITES_DIR
-    
+
     echo "Downloading Magento Archives..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
     do
@@ -52,7 +52,7 @@ function install_all_versions {
             echo "done"
         fi
     done
-    
+
     echo "Extracting Magento Archives..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
     do
@@ -63,7 +63,7 @@ function install_all_versions {
         rm -fr $SITES_DIR"magento"
         echo "done"
     done
-    
+
     echo "Creating Magento Databases..."
     for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
     do
@@ -72,7 +72,7 @@ function install_all_versions {
         $SQL_PATH -uroot -proot -e "CREATE DATABASE magento_$i;"
         echo "done"
     done
-    
+
     echo "Importing Filesystem and Database Sample Data..."
     echo "    Starting Filesystem Import..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
@@ -90,11 +90,11 @@ function install_all_versions {
         echo "done"
     done
     echo "    Database Import Done"
-    
+
     echo -n "Deleting Sample Data Folder..."
     rm -fr $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION"
     echo "done"
-    
+
     echo "Correcting Folder Permissions..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
     do
@@ -103,7 +103,7 @@ function install_all_versions {
         chmod -R 777 $SITES_DIR"magento_$i/media" $SITES_DIR"magento_$i/var"
         echo "  $i Done"
     done
-    
+
     echo "Installing Magento..."
     for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
     do
@@ -137,7 +137,7 @@ function install_all_versions {
         cp -R $SBP_PATH/* $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
         echo "done"
     done
-    
+
     for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
     do
         echo -n "    Updating database for $i..."
