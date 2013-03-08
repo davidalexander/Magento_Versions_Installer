@@ -173,6 +173,13 @@ function install_all_versions {
         echo "done"
     done
 
+    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+    do
+        echo "    Reindexing ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+        cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+        $PHP_PATH shell/indexer.php --reindexall
+    done
+
     echo "Romeo...done."
 }
 
