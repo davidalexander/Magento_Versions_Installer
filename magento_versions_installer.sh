@@ -31,14 +31,20 @@ function remove_all_installs {
 
 function install_all_versions {
 
-    echo -n "Downloading and Extracting Sample Data..."
-    if [ -f $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2" ]
-        then
-            echo "already exists"
-        else
-            curl www.magentocommerce.com/downloads/assets/$SAMPLE_DATA_VERSION/magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2 > $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2"
+    echo "Install Sample Data? (y/n)"
+    read INSTALL_SAMPLE_DATA
+    if [ $INSTALL_SAMPLE_DATA == 'y' ]; then
+        echo -n "Downloading and Extracting Sample Data..."
+        if [ -f $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2" ]
+            then
+                echo "already exists"
+            else
+                curl www.magentocommerce.com/downloads/assets/$SAMPLE_DATA_VERSION/magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2 > $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2"
+        fi
+        tar xzf $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2" -C $SITES_DIR
+    else
+        echo "Skipping Sample Data Download"
     fi
-    tar xzf $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION.tar.bz2" -C $SITES_DIR
 
     echo "Downloading Magento Archives..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
@@ -73,27 +79,30 @@ function install_all_versions {
         echo "done"
     done
 
-    echo "Importing Filesystem and Database Sample Data..."
-    echo "    Starting Filesystem Import..."
-    for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
-    do
-        echo -n "        Copying Files for $i..."
-        cp -R $SITES_DIR"magento-sample-data-1.6.1.0/media/catalog/" $SITES_DIR"magento_$i/media/"
+    if [ $INSTALL_SAMPLE_DATA == 'y' ]; then
+        echo "Importing Filesystem and Database Sample Data..."
+        echo "    Starting Filesystem Import..."
+        for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
+        do
+            echo -n "        Copying Files for $i..."
+            cp -R $SITES_DIR"magento-sample-data-1.6.1.0/media/catalog/" $SITES_DIR"magento_$i/media/"
+            echo "done"
+        done
+        echo "    Filesystem Done"
+        echo "    Starting Database Import..."
+        for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
+        do
+            echo -n "        Importing Database for $i..."
+            $SQL_PATH -uroot -proot magento_$i < $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION/magento_sample_data_for_$SAMPLE_DATA_VERSION.sql"
+            echo "done"
+        done
+        echo "    Database Import Done"
+        echo -n "Deleting Sample Data Folder..."
+        rm -fr $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION"
         echo "done"
-    done
-    echo "    Filesystem Done"
-    echo "    Starting Database Import..."
-    for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
-    do
-        echo -n "        Importing Database for $i..."
-        $SQL_PATH -uroot -proot magento_$i < $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION/magento_sample_data_for_$SAMPLE_DATA_VERSION.sql"
-        echo "done"
-    done
-    echo "    Database Import Done"
-
-    echo -n "Deleting Sample Data Folder..."
-    rm -fr $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION"
-    echo "done"
+    else
+        echo "Skipping Sample Data Installation"
+    fi
 
     echo "Correcting Folder Permissions..."
     for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
@@ -130,48 +139,57 @@ function install_all_versions {
         --admin_password "password123"
     done
 
-    echo "Installing Skywire Boilerplate from '$SBP_PATH'..."
-    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-    do
-        echo -n "    Copying files for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-        cp -R $SBP_PATH/ $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
-        echo "done"
-    done
+    echo "Install SMBP? (y/n)"
+    read INSTALL_SMBP
+    if [ $INSTALL_SMBP == 'y' ]; then
+        echo "Installing Skywire Boilerplate from '$SBP_PATH'..."
+        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+        do
+            echo -n "    Copying files for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+            cp -R $SBP_PATH/ $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            echo "done"
+        done
+        for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
+        do
+            echo -n "    Updating database for $i..."
+            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/001_config_reset.sql"
+            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/002_optional_zip_countries.sql"
+            # $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/003_site_specific.sql" # this would need to be edited first
+            echo "done"
+        done
+        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+        do
+            echo "    Updating CMS pages/blocks for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+            cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skywire_defaults/php/"
+            $PHP_PATH -f "cms_blocks.php"
+            $PHP_PATH -f "cms_pages.php"
+        done
+        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+        do
+            echo -n "    Patching index.php for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+            patch -s $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/index.php" < $SBP_PATH"/skywire_defaults/magento_developer_subdomains.patch"
+            echo "done"
+        done
+    else
+        echo "Skipping SMBP Installation"
+    fi
 
-    for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
-    do
-        echo -n "    Updating database for $i..."
-        $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/001_config_reset.sql"
-        $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/002_optional_zip_countries.sql"
-        # $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/003_site_specific.sql" # this would need to be edited first
-        echo "done"
-    done
-
-    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-    do
-        echo "    Updating CMS pages/blocks for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-        cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skywire_defaults/php/"
-        $PHP_PATH -f "cms_blocks.php"
-        $PHP_PATH -f "cms_pages.php"
-    done
-
-    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-    do
-        echo -n "    Patching index.php for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-        patch -s $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/index.php" < $SBP_PATH"/skywire_defaults/magento_developer_subdomains.patch"
-        echo "done"
-    done
-
-    for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-    do
-        echo -n "    Setting up repo for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-        rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/.git"
-        cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
-        git init
-        git add -A
-        git commit -m "initial commit"
-        echo "done"
-    done
+    echo "Init Git? (y/n)"
+    read INIT_GIT
+    if [ $INIT_GIT == 'y' ]; then
+        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
+        do
+            echo -n "    Setting up repo for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+            rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/.git"
+            cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            git init
+            git add -A
+            git commit -m "initial commit"
+            echo "done"
+        done
+    else
+        echo "Skipping Git Init"
+    fi
 
     for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
     do
