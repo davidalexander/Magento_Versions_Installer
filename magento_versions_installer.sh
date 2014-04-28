@@ -147,6 +147,10 @@ function install_all_versions {
         do
             echo -n "    Copying files for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
             cp -R $SBP_PATH/ $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/app/design/frontend/skywire/"
+            rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire/"
+            ln -s $SBP_PATH"/app/design/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/app/design/frontend/skywire"
+            ln -s $SBP_PATH"/skin/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire"
             echo "done"
         done
         for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
