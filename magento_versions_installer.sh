@@ -151,6 +151,12 @@ function install_all_versions {
             rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire/"
             ln -s $SBP_PATH"/app/design/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/app/design/frontend/skywire"
             ln -s $SBP_PATH"/skin/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire"
+            cp -R "/Users/david/Sites/github/Magento-Extensions/Lesscss/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            cp -R "/Users/david/Sites/github/Magento-Extensions/CmsLayouts/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            cp -R "/Users/david/Sites/github/Magento-Lib/lib/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/lib/"
+            cp -R "/Users/david/Sites/github/Magento-Lib/shell/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/shell/"
+            cp -R "/Users/david/Sites/github/Magento-Extensions/MegaMenu/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            cp -R "/Users/david/Sites/github/Magento-Extensions/UrlPorts/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
             echo "done"
         done
         for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
@@ -159,6 +165,7 @@ function install_all_versions {
             $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/001_config_reset.sql"
             $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/002_optional_zip_countries.sql"
             # $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/003_site_specific.sql" # this would need to be edited first
+            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/004_symlinks.sql"
             echo "done"
         done
         for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
