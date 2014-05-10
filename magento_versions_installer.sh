@@ -7,6 +7,8 @@ MAGENTO_SAFE_VERSIONS_ARRAY=( "${MAGENTO_VERSIONS_ARRAY[@]//./}" )
 PHP_PATH="/Applications/MAMP/bin/php/php5.3.27/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
 SBP_PATH="/Users/david/Sites/github/Magento-Boilerplate"
+MYSQL_USER="root"
+MYSQL_PASS="root"
 
 function remove_all_installs {
 
@@ -22,7 +24,7 @@ function remove_all_installs {
     for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
     do
         echo -n "       Deleting $i database..."
-        $SQL_PATH -uroot -proot -e "DROP DATABASE IF EXISTS magento_$i;"
+        $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS -e "DROP DATABASE IF EXISTS magento_$i;"
         echo "done"
     done
     echo "Romeo...done."
@@ -74,8 +76,8 @@ function install_all_versions {
     for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
     do
         echo -n "    Creating Database for $i..."
-        $SQL_PATH -uroot -proot -e "DROP DATABASE IF EXISTS magento_$i;"
-        $SQL_PATH -uroot -proot -e "CREATE DATABASE magento_$i;"
+        $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS -e "DROP DATABASE IF EXISTS magento_$i;"
+        $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS -e "CREATE DATABASE magento_$i;"
         echo "done"
     done
 
@@ -93,7 +95,7 @@ function install_all_versions {
         for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
         do
             echo -n "        Importing Database for $i..."
-            $SQL_PATH -uroot -proot magento_$i < $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION/magento_sample_data_for_$SAMPLE_DATA_VERSION.sql"
+            $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS magento_$i < $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION/magento_sample_data_for_$SAMPLE_DATA_VERSION.sql"
             echo "done"
         done
         echo "    Database Import Done"
@@ -151,7 +153,6 @@ function install_all_versions {
             rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire/"
             ln -s $SBP_PATH"/app/design/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/app/design/frontend/skywire"
             ln -s $SBP_PATH"/skin/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire"
-            cp -R "/Users/david/Sites/github/Magento-Extensions/Lesscss/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
             cp -R "/Users/david/Sites/github/Magento-Extensions/CmsLayouts/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
             cp -R "/Users/david/Sites/github/Magento-Lib/lib/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/lib/"
             cp -R "/Users/david/Sites/github/Magento-Lib/shell/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/shell/"
@@ -162,10 +163,10 @@ function install_all_versions {
         for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
         do
             echo -n "    Updating database for $i..."
-            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/001_config_reset.sql"
-            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/002_optional_zip_countries.sql"
-            # $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/003_site_specific.sql" # this would need to be edited first
-            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/004_symlinks.sql"
+            $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS magento_$i < $SBP_PATH"/skywire_defaults/sql/001_config_reset.sql"
+            $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS magento_$i < $SBP_PATH"/skywire_defaults/sql/002_optional_zip_countries.sql"
+            # $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS magento_$i < $SBP_PATH"/skywire_defaults/sql/003_site_specific.sql" # this would need to be edited first
+            $SQL_PATH -u$MYSQL_USER -p$MYSQL_PASS magento_$i < $SBP_PATH"/skywire_defaults/sql/004_symlinks.sql"
             echo "done"
         done
         for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
@@ -177,8 +178,9 @@ function install_all_versions {
         done
         for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
         do
-            echo -n "    Patching index.php for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+            echo -n "    Patching index.php and app/etc/enterprise.xml for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
             patch -s $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/index.php" < $SBP_PATH"/skywire_defaults/magento_developer_subdomains.patch"
+            patch -s $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/app/etc/enterprise.xml" < $SBP_PATH"/skywire_defaults/enterprise_disable_auto_updates.patch"
             echo "done"
         done
     else
