@@ -1,8 +1,10 @@
 #!/bin/bash
 
 SITES_DIR="/Users/david/Sites/magento/"
-SAMPLE_DATA_VERSION="1.6.1.0"
-MAGENTO_VERSIONS_ARRAY=("1.4.0.1" "1.4.1.0" "1.4.1.1" "1.4.2.0" "1.5.0.1" "1.5.1.0" "1.6.0.0" "1.6.1.0" "1.6.2.0" "1.7.0.0" "1.7.0.2" "1.8.0.0" "1.8.1.0")
+# SAMPLE_DATA_VERSION="1.6.1.0"
+SAMPLE_DATA_VERSION="1.9.0.0"
+# MAGENTO_VERSIONS_ARRAY=("1.4.0.1" "1.4.1.0" "1.4.1.1" "1.4.2.0" "1.5.0.1" "1.5.1.0" "1.6.0.0" "1.6.1.0" "1.6.2.0" "1.7.0.0" "1.7.0.2" "1.8.0.0" "1.8.1.0")
+MAGENTO_VERSIONS_ARRAY=("1.9.0.1")
 MAGENTO_SAFE_VERSIONS_ARRAY=( "${MAGENTO_VERSIONS_ARRAY[@]//./}" )
 PHP_PATH="/Applications/MAMP/bin/php/php5.3.27/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
@@ -87,7 +89,7 @@ function install_all_versions {
         for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
         do
             echo -n "        Copying Files for $i..."
-            cp -R $SITES_DIR"magento-sample-data-1.6.1.0/media/catalog/" $SITES_DIR"magento_$i/media/"
+            cp -R $SITES_DIR"magento-sample-data-$SAMPLE_DATA_VERSION/" $SITES_DIR"magento_$i/"
             echo "done"
         done
         echo "    Filesystem Done"
