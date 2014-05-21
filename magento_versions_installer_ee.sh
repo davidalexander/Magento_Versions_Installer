@@ -1,8 +1,8 @@
 #!/bin/bash
 
 SITES_DIR="/Users/david/Sites/magento/"
-MAGENTO_VERSIONS_ARRAY=("enterprise-1.13.1.0.tar-2013-11-23-12-59-27")
-MAGENTO_SAFE_VERSIONS_ARRAY=( "enterprise11310tar20131123125927" )
+MAGENTO_VERSIONS_ARRAY=("enterprise-1.14.0.1.tar-2014-05-15-03-41-43")
+MAGENTO_SAFE_VERSIONS_ARRAY=( "ee11401" )
 PHP_PATH="/Applications/MAMP/bin/php/php5.3.27/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
 SBP_PATH="/Users/david/Sites/github/Magento-Boilerplate"
@@ -59,8 +59,9 @@ function install_all_versions {
         for i in "${MAGENTO_VERSIONS_ARRAY[@]}"
         do
             echo -n "        Copying Files for $i..."
-            cp -R $SITES_DIR"magento_enterprise_sample_data_for_1.12.0.0-2012-04-23-11-43-17/media/" $SITES_DIR"magento_$i/media/"
-            cp -R $SITES_DIR"magento_enterprise_sample_data_for_1.12.0.0-2012-04-23-11-43-17/privatesales/" $SITES_DIR"magento_$i/privatesales/"
+            cp -R $SITES_DIR"magento-sample-data-1.14.0.0/media/" $SITES_DIR"magento_$i/media/"
+            cp -R $SITES_DIR"magento-sample-data-1.14.0.0/privatesales/" $SITES_DIR"magento_$i/privatesales/"
+            cp -R $SITES_DIR"magento-sample-data-1.14.0.0/skin/" $SITES_DIR"magento_$i/skin/"
             echo "done"
         done
         echo "    Filesystem Done"
@@ -68,7 +69,7 @@ function install_all_versions {
         for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
         do
             echo -n "        Importing Database for $i..."
-            $SQL_PATH -uroot -proot magento_$i < $SITES_DIR"magento_enterprise_sample_data_for_1.12.0.0-2012-04-23-11-43-17/magento_enterprise_sample_data_for_1.12.0.0.sql"
+            $SQL_PATH -uroot -proot magento_$i < $SITES_DIR"magento-sample-data-1.14.0.0/magento_sample_data_for_1.14.0.0.sql"
             echo "done"
         done
         echo "    Database Import Done"
@@ -110,58 +111,6 @@ function install_all_versions {
         --admin_username "example@example.com" \
         --admin_password "password123"
     done
-
-    echo "Install SMBP? (y/n)"
-    read INSTALL_SMBP
-    if [ $INSTALL_SMBP == 'y' ]; then
-        echo "Installing Skywire Boilerplate from '$SBP_PATH'..."
-        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-        do
-            echo -n "    Copying files for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-            cp -R $SBP_PATH/ $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
-            echo "done"
-        done
-        for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
-        do
-            echo -n "    Updating database for $i..."
-            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/001_config_reset.sql"
-            $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/002_optional_zip_countries.sql"
-            # $SQL_PATH -uroot -proot magento_$i < $SBP_PATH"/skywire_defaults/sql/003_site_specific.sql" # this would need to be edited first
-            echo "done"
-        done
-        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-        do
-            echo "    Updating CMS pages/blocks for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-            cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skywire_defaults/php/"
-            $PHP_PATH -f "cms_blocks.php"
-            $PHP_PATH -f "cms_pages.php"
-        done
-        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-        do
-            echo -n "    Patching index.php for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-            patch -s $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/index.php" < $SBP_PATH"/skywire_defaults/magento_developer_subdomains.patch"
-            echo "done"
-        done
-    else
-        echo "Skipping SMBP Installation"
-    fi
-
-    echo "Init Git? (y/n)"
-    read INIT_GIT
-    if [ $INIT_GIT == 'y' ]; then
-        for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
-        do
-            echo -n "    Setting up repo for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
-            rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/.git"
-            cd $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
-            git init
-            git add -A
-            git commit -m "initial commit"
-            echo "done"
-        done
-    else
-        echo "Skipping Git Init"
-    fi
 
     for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
     do
