@@ -3,7 +3,7 @@
 SITES_DIR="/Users/david/Sites/magento/"
 MAGENTO_VERSIONS_ARRAY=("enterprise-1.14.0.1.tar-2014-05-15-03-41-43")
 MAGENTO_SAFE_VERSIONS_ARRAY=( "ee11401" )
-PHP_PATH="/Applications/MAMP/bin/php/php5.4.4/bin/php"
+PHP_PATH="/Applications/MAMP/bin/php/php5.5.14/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
 SBP_PATH="/Users/david/Sites/github/Magento-Boilerplate"
 
