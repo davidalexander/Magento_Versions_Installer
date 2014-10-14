@@ -160,6 +160,7 @@ function install_all_versions {
             cp -R "/Users/david/Sites/github/Magento-Lib/shell/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/shell/"
             cp -R "/Users/david/Sites/github/Magento-Extensions/MegaMenu/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
             cp -R "/Users/david/Sites/github/Magento-Extensions/UrlPorts/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            cp -R "/Users/david/Sites/github/Magento-Extensions/VisitorLoggingDisable/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
             echo "done"
         done
         for i in "${MAGENTO_SAFE_VERSIONS_ARRAY[@]}"
