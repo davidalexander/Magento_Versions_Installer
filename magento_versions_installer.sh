@@ -133,9 +133,9 @@ function install_all_versions {
         --url "http://${MAGENTO_SAFE_VERSIONS_ARRAY[$i]}.magento.com/" \
         --skip_url_validation  "yes" \
         --use_rewrites "yes" \
-        --use_secure "no" \
+        --use_secure "yes" \
         --secure_base_url "https://${MAGENTO_SAFE_VERSIONS_ARRAY[$i]}.magento.com/" \
-        --use_secure_admin "no" \
+        --use_secure_admin "yes" \
         --admin_firstname "--firstname" \
         --admin_lastname "--lastname" \
         --admin_email "example@example.com" \
