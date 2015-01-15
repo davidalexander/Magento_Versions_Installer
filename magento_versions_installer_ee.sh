@@ -1,8 +1,8 @@
 #!/bin/bash
 
 SITES_DIR="/Users/david/Sites/magento/"
-MAGENTO_VERSIONS_ARRAY=("enterprise-1.14.0.1.tar-2014-05-15-03-41-43")
-MAGENTO_SAFE_VERSIONS_ARRAY=( "ee11401" )
+MAGENTO_VERSIONS_ARRAY=("enterprise-1.14.1.0.tar-2014-11-13-02-45-55")
+MAGENTO_SAFE_VERSIONS_ARRAY=( "ee11410" )
 PHP_PATH="/Applications/MAMP/bin/php/php5.5.18/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
 SBP_PATH="/Users/david/Sites/github/Magento-Boilerplate"
