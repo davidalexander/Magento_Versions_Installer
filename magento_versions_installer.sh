@@ -1,10 +1,9 @@
 #!/bin/bash
 
 SITES_DIR="/Users/david/Sites/magento/"
-# SAMPLE_DATA_VERSION="1.6.1.0"
-SAMPLE_DATA_VERSION="1.9.0.0"
-# MAGENTO_VERSIONS_ARRAY=("1.4.0.1" "1.4.1.0" "1.4.1.1" "1.4.2.0" "1.5.0.1" "1.5.1.0" "1.6.0.0" "1.6.1.0" "1.6.2.0" "1.7.0.0" "1.7.0.2" "1.8.0.0" "1.8.1.0" "1.9.0.1")
-MAGENTO_VERSIONS_ARRAY=("1.9.0.1")
+SAMPLE_DATA_VERSION="1.9.1.0"
+# MAGENTO_VERSIONS_ARRAY=("1.4.0.1" "1.4.1.0" "1.4.1.1" "1.4.2.0" "1.5.0.1" "1.5.1.0" "1.6.0.0" "1.6.1.0" "1.6.2.0" "1.7.0.0" "1.7.0.2" "1.8.0.0" "1.8.1.0" "1.9.0.1" "1.9.1.0")
+MAGENTO_VERSIONS_ARRAY=("1.9.1.0")
 MAGENTO_SAFE_VERSIONS_ARRAY=( "${MAGENTO_VERSIONS_ARRAY[@]//./}" )
 PHP_PATH="/Applications/MAMP/bin/php/php5.5.18/bin/php"
 SQL_PATH="/Applications/MAMP/Library/bin/mysql"
@@ -150,13 +149,19 @@ function install_all_versions {
         for (( i = 0 ; i < ${#MAGENTO_VERSIONS_ARRAY[@]} ; i++ ))
         do
             echo -n "    Copying files for ${MAGENTO_VERSIONS_ARRAY[$i]}..."
+            # SMBP files
             cp -R $SBP_PATH/ $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            # replace theme and skin with symbolic links
             rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/app/design/frontend/skywire/"
             rm -fr $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire/"
             ln -s $SBP_PATH"/app/design/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/app/design/frontend/skywire"
             ln -s $SBP_PATH"/skin/frontend/skywire/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/skin/frontend/skywire"
+            # extensions
             cp -R "/Users/david/Sites/github/Magento-Extensions/CmsLayouts/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            cp -R "/Users/david/Sites/github/Magento-Extensions/ImageResize/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            cp -R "/Users/david/Sites/github/Magento-Extensions/MergeTimestamp/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
             cp -R "/Users/david/Sites/github/Magento-Extensions/UrlPorts/src/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/"
+            #  library's
             cp -R "/Users/david/Sites/github/Magento-Lib/lib/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/lib/"
             cp -R "/Users/david/Sites/github/Magento-Lib/shell/" $SITES_DIR"magento_${MAGENTO_VERSIONS_ARRAY[$i]}/shell/"
             echo "done"
